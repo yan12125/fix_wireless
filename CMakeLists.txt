@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.11)
 project(fix_wireless)
 
 find_package(Qt5Core)
+find_package(Qt5DBus)
 find_package(PkgConfig)
 pkg_check_modules(LIBUSB REQUIRED libusb)
 
@@ -12,4 +13,4 @@ set(CMAKE_EXE_LINKER_FLAGS "${LIBUSB_LDFLAGS}")
 
 add_executable(fix_wireless fix_wireless.cpp)
 
-target_link_libraries(fix_wireless Qt5::Core QtSystemd)
+target_link_libraries(fix_wireless Qt5::Core Qt5::DBus)

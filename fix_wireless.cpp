@@ -10,7 +10,9 @@
 #include <libusb.h>
 #include <QDebug>
 #include <QCoreApplication>
-#include <QtSystemd/sdmanager.h>
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
 
 // find the USB wlan adaptor 2001:3c1b
 // http://www.jollen.org/blog/2008/01/libusb_hello_world.html
@@ -97,13 +99,22 @@ bool restart_services()
     QString services[] { "network@wlan0.service", "named.service", "dhcpd4.service", "hostapd.service", "NAT.service" };
     for(QString service : services)
     {
-         Systemd::Job::Ptr job = Systemd::restartUnit(service, Systemd::Replace);
-         if(!job)
-         {
-             std::cout << "重新啟動服務" << service.toStdString() << "失敗" << std::endl;
-             return false;
-         }
-         std::cout << "服務" << service.toStdString() << "啟動成功" << std::endl;
+        // References:
+        // https://zignar.net/2014/09/08/getting-started-with-dbus-python-systemd/
+        // http://www.freedesktop.org/wiki/Software/systemd/dbus/
+        // https://techbase.kde.org/Development/Tutorials/D-Bus/Accessing_Interfaces
+        // http://comments.gmane.org/gmane.comp.lib.qt.general/19484
+        QDBusConnection bus = QDBusConnection::systemBus();
+        QDBusInterface* interface = new QDBusInterface("org.freedesktop.systemd1", "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager", bus);
+        QDBusReply<QDBusObjectPath> reply = interface->call("RestartUnit", service, "replace");
+
+        if(!reply.isValid())
+        {
+            std::cout << "重新啟動服務" << service.toStdString() << "失敗: "
+                      << reply.error().message().toStdString() << std::endl;
+            return false;
+        }
+        std::cout << "服務" << service.toStdString() << "啟動成功" << std::endl;
     }
     return true;
 }
