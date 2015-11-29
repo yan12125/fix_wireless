@@ -5,7 +5,7 @@ project(fix_wireless)
 find_package(Qt5Core)
 find_package(Qt5DBus)
 find_package(PkgConfig)
-pkg_check_modules(LIBUSB REQUIRED libusb)
+pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
 
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11 ${LIBUSB_CFLAGS}")

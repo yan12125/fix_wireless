@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#include <usb.h>
+#include <unistd.h>
 #include <libusb.h>
 #include <QDebug>
 #include <QCoreApplication>
@@ -18,22 +18,20 @@
 // http://www.jollen.org/blog/2008/01/libusb_hello_world.html
 bool check_wlan_adaptor()
 {
-    usb_init();
-    usb_find_busses();
-    usb_find_devices();
+    libusb_init(NULL);
 
-    usb_bus* busses = usb_get_busses();
+    libusb_device **devs;
+    libusb_get_device_list(NULL, &devs);
 
-    for (usb_bus* bus = busses; bus; bus = bus->next)
-    {
-        for (struct usb_device* dev = bus->devices; dev; dev = dev->next)
+    libusb_device *dev;
+    int i = 0;
+    while ((dev = devs[i++]) != NULL) {
+        libusb_device_descriptor desc;
+        libusb_get_device_descriptor(dev, &desc);
+        if ((desc.idVendor == 0x2001) && (desc.idProduct == 0x3c1b))
         {
-            usb_device_descriptor* desc = &(dev->descriptor);
-            if ((desc->idVendor == 0x2001) && (desc->idProduct == 0x3c1b))
-            {
-                std::cout << "已偵測到無線網卡" << std::endl;
-                return true;
-            }
+            std::cout << "已偵測到無線網卡" << std::endl;
+            return true;
         }
     }
     std::cout << "找不到無線網卡" << std::endl;
