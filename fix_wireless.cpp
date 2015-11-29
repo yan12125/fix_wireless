@@ -80,6 +80,9 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext& Context, const QS
     case QtDebugMsg:
         std::cout << "Debug: " << msg.toStdString() << std::endl;
         break;
+    case QtInfoMsg:
+        std::cout << "Info: " << msg.toStdString() << std::endl;
+        break;
     case QtWarningMsg:
         std::cout << "Warning: " << msg.toStdString() << std::endl;
         break;
